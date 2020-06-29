@@ -62,8 +62,9 @@ Mono_Buffer::channel_t Mono_Buffer::channel( int index )
 	return ch;
 }
 
-void Mono_Buffer::end_frame( blip_time_t t, bool )
+void Mono_Buffer::end_frame( blip_time_t t, bool unused )
 {
+	(void)unused;
 	buf.end_frame( t );
 }
 
