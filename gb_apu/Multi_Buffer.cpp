@@ -111,7 +111,7 @@ void Stereo_Buffer::end_frame( blip_time_t clock_count, bool stereo )
 {
 	for ( unsigned i = 0; i < buf_count; i++ )
 		bufs [i].end_frame( clock_count );
-	
+
 	stereo_added |= stereo;
 }
 
@@ -119,7 +119,7 @@ long Stereo_Buffer::read_samples( blip_sample_t* out, long count )
 {
 	require( !(count & 1) ); // count must be even
 	count = (unsigned) count / 2;
-	
+
 	long avail = bufs [0].samples_avail();
 	if ( count > avail )
 		count = avail;
@@ -128,7 +128,7 @@ long Stereo_Buffer::read_samples( blip_sample_t* out, long count )
 		if ( stereo_added || was_stereo )
 		{
 			mix_stereo( out, count );
-			
+
 			bufs [0].remove_samples( count );
 			bufs [1].remove_samples( count );
 			bufs [2].remove_samples( count );
@@ -136,20 +136,20 @@ long Stereo_Buffer::read_samples( blip_sample_t* out, long count )
 		else
 		{
 			mix_mono( out, count );
-			
+
 			bufs [0].remove_samples( count );
-			
+
 			bufs [1].remove_silence( count );
 			bufs [2].remove_silence( count );
 		}
-		
+
 		// to do: this might miss opportunities for optimization
 		if ( !bufs [0].samples_avail() ) {
 			was_stereo = stereo_added;
 			stereo_added = false;
 		}
 	}
-	
+
 	return count * 2;
 }
 
@@ -157,14 +157,14 @@ long Stereo_Buffer::read_samples( blip_sample_t* out, long count )
 
 void Stereo_Buffer::mix_stereo( blip_sample_t* out, long count )
 {
-	Blip_Reader left; 
-	Blip_Reader right; 
+	Blip_Reader left;
+	Blip_Reader right;
 	Blip_Reader center;
-	
+
 	left.begin( bufs [1] );
 	right.begin( bufs [2] );
 	int bass = center.begin( bufs [0] );
-	
+
 	while ( count-- )
 	{
 		int c = center.read();
@@ -174,17 +174,17 @@ void Stereo_Buffer::mix_stereo( blip_sample_t* out, long count )
 		out [0] = l;
 		out [1] = r;
 		out += 2;
-		
+
 		if ( (BOOST::int16_t) l != l )
 			out [-2] = 0x7FFF - (l >> 24);
-		
+
 		left.next( bass );
 		right.next( bass );
-		
+
 		if ( (BOOST::int16_t) r != r )
 			out [-1] = 0x7FFF - (r >> 24);
 	}
-	
+
 	center.end( bufs [0] );
 	right.end( bufs [2] );
 	left.end( bufs [1] );
@@ -194,7 +194,7 @@ void Stereo_Buffer::mix_mono( blip_sample_t* out, long count )
 {
 	Blip_Reader in;
 	int bass = in.begin( bufs [0] );
-	
+
 	while ( count-- )
 	{
 		long s = in.read();
@@ -202,14 +202,14 @@ void Stereo_Buffer::mix_mono( blip_sample_t* out, long count )
 		out [0] = s;
 		out [1] = s;
 		out += 2;
-		
+
 		if ( (BOOST::int16_t) s != s ) {
 			s = 0x7FFF - (s >> 24);
 			out [-2] = s;
 			out [-1] = s;
 		}
 	}
-	
+
 	in.end( bufs [0] );
 }
 
