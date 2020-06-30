@@ -45,20 +45,20 @@ Sound_Queue::~Sound_Queue()
 const char* Sound_Queue::start( long sample_rate, int chan_count )
 {
 	assert( !bufs ); // can only be initialized once
-	
+
 	write_buf = 0;
 	write_pos = 0;
 	read_buf = 0;
-	
+
 	bufs = new sample_t [(long) buf_size * buf_count];
 	if ( !bufs )
 		return "Out of memory";
 	currently_playing_ = bufs;
-	
+
 	free_sem = SDL_CreateSemaphore( buf_count - 1 );
 	if ( !free_sem )
 		return sdl_error( "Couldn't create semaphore" );
-	
+
 	SDL_AudioSpec as;
 	as.freq = sample_rate;
 	as.format = AUDIO_S16SYS;
@@ -72,7 +72,7 @@ const char* Sound_Queue::start( long sample_rate, int chan_count )
 		return sdl_error( "Couldn't open SDL audio" );
 	SDL_PauseAudio( false );
 	sound_open = true;
-	
+
 	return NULL;
 }
 
@@ -84,13 +84,13 @@ void Sound_Queue::stop()
 		SDL_PauseAudio( true );
 		SDL_CloseAudio();
 	}
-	
+
 	if ( free_sem )
 	{
 		SDL_DestroySemaphore( free_sem );
 		free_sem = NULL;
 	}
-	
+
 	delete [] bufs;
 	bufs = NULL;
 }
@@ -114,12 +114,12 @@ void Sound_Queue::write( const sample_t* in, int count )
 		int n = buf_size - write_pos;
 		if ( n > count )
 			n = count;
-		
+
 		memcpy( buf( write_buf ) + write_pos, in, n * sizeof (sample_t) );
 		in += n;
 		write_pos += n;
 		count -= n;
-		
+
 		if ( write_pos >= buf_size )
 		{
 			write_pos = 0;
