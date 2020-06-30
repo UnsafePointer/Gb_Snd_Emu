@@ -7,6 +7,7 @@
 #include <stddef.h>
 #include <math.h>
 #include <limits>
+#include <cstdint>
 
 /* Copyright (C) 2003-2005 Shay Green. This module is free software; you
 can redistribute it and/or modify it under the terms of the GNU Lesser
@@ -47,7 +48,7 @@ void Blip_Buffer::clear( bool entire_buffer )
 
 blargg_err_t Blip_Buffer::set_sample_rate( long new_rate, int msec )
 {
-	unsigned new_size = (std::numeric_limits<u_int32_t>::max() >> BLIP_BUFFER_ACCURACY) + 1 - widest_impulse_ - 64;
+	unsigned new_size = (std::numeric_limits<uint32_t>::max() >> BLIP_BUFFER_ACCURACY) + 1 - widest_impulse_ - 64;
 	if ( msec != blip_default_length )
 	{
 		size_t s = (new_rate * (msec + 1) + 999) / 1000;
